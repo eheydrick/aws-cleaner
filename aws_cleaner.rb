@@ -3,6 +3,9 @@
 # Listen for AWS Config EC2 termination events delivered via SQS
 # and remove the node from Chef and Sensu
 #
+# Copyright (c) 2015 Eric Heydrick
+# Licensed under The MIT License
+#
 
 begin
   require 'aws-sdk-core'
