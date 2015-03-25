@@ -1,5 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rest-client'
+gem 'aws-sdk-core'
 gem 'chef-api'
 gem 'hipchat'
+gem 'rest-client'

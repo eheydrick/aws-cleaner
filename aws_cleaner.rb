@@ -8,10 +8,10 @@
 #
 
 begin
-  require 'aws-sdk-core'
   require 'json'
   require 'yaml'
   require 'bundler/setup'
+  require 'aws-sdk-core'
   require 'chef-api'
   require 'hipchat'
   require 'rest-client'
