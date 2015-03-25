@@ -1,0 +1,16 @@
+:aws:
+  :access_key_id: 'AWS Access Key'
+  :secret_access_key: 'AWS Secret Access Key'
+  :region: 'us-west-2'
+:sqs:
+  :queue: 'https://sqs.us-west-2.amazonaws.com/1234/aws-config'
+:sensu:
+  :url: 'http://sensu.example.com:4567'
+:chef:
+  :url: 'https://chef.example.com/organizations/example'
+  :client: 'somebody'
+  :key: '/path/to/client.pem'
+:hipchat:
+  :api_token: 'Hipchat API token'
+  :room: 'Notifications'
+  :enable: true
