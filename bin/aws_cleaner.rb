@@ -15,17 +15,23 @@ begin
   require 'chef-api'
   require 'hipchat'
   require 'rest-client'
+  require 'trollop'
 rescue LoadError => e
   raise "Missing gems: #{e}"
 end
 
-def config
-  YAML.load(File.read('config.yml'))
+def config(file)
+  YAML.load(File.read(file))
   rescue StandardError => e
     raise "Failed to open config file: #{e}"
 end
 
-@config = config
+# get options
+opts = Trollop::options do
+  opt :config, 'Path to config file', :type => :string, :default => 'config.yml'
+end
+
+@config = config(opts[:config])
 
 @sqs = Aws::SQS::Client.new(@config[:aws])
 
