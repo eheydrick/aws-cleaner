@@ -1,7 +1,8 @@
 #!/usr/bin/env ruby
 #
 # Listen for AWS Config EC2 termination events delivered via SQS
-# and remove the node from Chef and Sensu
+# and remove the node from Chef and Sensu and send a notification
+# to Hipchat
 #
 # Copyright (c) 2015 Eric Heydrick
 # Licensed under The MIT License
@@ -10,7 +11,6 @@
 begin
   require 'json'
   require 'yaml'
-  require 'bundler/setup'
   require 'aws-sdk-core'
   require 'chef-api'
   require 'hipchat'
