@@ -125,52 +125,56 @@ def notify_hipchat(msg)
   hipchat[room].send('AWS Cleaner', msg)
 end
 
-# get messages from SQS
-messages = @sqs.receive_message(
-  queue_url: @config[:sqs][:queue],
-  max_number_of_messages: 10,
-  visibility_timeout: 3
-).messages
-
-puts "Got #{messages.size} messages"
-
 # main loop
-messages.each_with_index do |message, index|
-  puts "Looking at message number #{index}"
-  body = parse(message.body)
-  id = message.receipt_handle
+loop do
+  # get messages from SQS
+  messages = @sqs.receive_message(
+    queue_url: @config[:sqs][:queue],
+    max_number_of_messages: 10,
+    visibility_timeout: 3
+  ).messages
 
-  unless body
-    delete_message(id)
-    next
-  end
+  puts "Got #{messages.size} messages"
 
-  instance_id = process_message(body)
+  messages.each_with_index do |message, index|
+    puts "Looking at message number #{index}"
+    body = parse(message.body)
+    id = message.receipt_handle
 
-  if instance_id
-    chef_node = get_chef_node_name(instance_id)
+    unless body
+      delete_message(id)
+      next
+    end
 
-    if chef_node
-      if remove_from_chef(chef_node)
-        puts "Removed #{chef_node} from Chef"
+    instance_id = process_message(body)
+
+    if instance_id
+      chef_node = get_chef_node_name(instance_id)
+
+      if chef_node
+        if remove_from_chef(chef_node)
+          puts "Removed #{chef_node} from Chef"
+          delete_message(id)
+        end
+      else
+        puts "Instance #{instance_id} does not exist in Chef, deleting message"
         delete_message(id)
+      end
+
+      if in_sensu?(chef_node)
+        if remove_from_sensu(chef_node)
+          puts "Removed #{chef_node} from Sensu"
+          delete_message(id)
+        else
+          puts "Instance #{instance_id} does not exist in Sensu, deleting message"
+          delete_message(id)
+        end
       end
     else
-      puts "Instance #{instance_id} does not exist in Chef, deleting message"
+      puts 'Message not relevant, deleting'
       delete_message(id)
     end
-
-    if in_sensu?(chef_node)
-      if remove_from_sensu(chef_node)
-        puts "Removed #{chef_node} from Sensu"
-        delete_message(id)
-      else
-        puts "Instance #{instance_id} does not exist in Sensu, deleting message"
-        delete_message(id)
-      end
-    end
-  else
-    puts 'Message not relevant, deleting'
-    delete_message(id)
   end
+
+  sleep(5)
 end
