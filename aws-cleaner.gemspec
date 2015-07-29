@@ -2,7 +2,7 @@ Gem::Specification.new do |s|
   s.name        = 'aws-cleaner'
   s.version     = '0.1.1'
   s.summary     = "AWS Cleaner cleans up after EC2 nodes are terminated"
-  s.description = "A tool to clean up after EC2 nodes are terminated"
+  s.description = s.summary
   s.authors     = ["Eric Heydrick"]
   s.email       = 'eheydrick@gmail.com'
   s.executables = ['aws_cleaner.rb']
