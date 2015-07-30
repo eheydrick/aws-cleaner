@@ -1,5 +1,7 @@
 ## AWS Cleaner
 
+[![Gem Version](https://badge.fury.io/rb/aws-cleaner.svg)](http://badge.fury.io/rb/aws-cleaner)
+
 AWS Cleaner listens for EC2 termination events produced by AWS Config
 and removes the instances from Chef and Sensu monitoring. Optionally
 sends messages to Hipchat when actions occur.
