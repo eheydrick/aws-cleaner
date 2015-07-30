@@ -17,6 +17,12 @@ SQS](http://docs.aws.amazon.com/config/latest/developerguide/monitor-resource-ch
 
 ### Usage
 
+```
+Options:
+  -c, --config=<s>    Path to config file (default: config.yml)
+  -h, --help          Show this message
+```
+
 Copy the example config file ``config.yml.sample`` to ``config.yml``
 and fill in the configuration details. You will need AWS Credentials
 and are strongly encouraged to use an IAM user with access limited to
