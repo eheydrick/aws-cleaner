@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'aws-cleaner'
-  s.version     = '0.1.1'
+  s.version     = '0.1.2'
   s.summary     = "AWS Cleaner cleans up after EC2 instances are terminated"
   s.description = s.summary
   s.authors     = ["Eric Heydrick"]
