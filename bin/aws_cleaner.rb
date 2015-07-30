@@ -87,7 +87,7 @@ def in_sensu?(node_name)
     RestClient.get("#{@config[:sensu][:url]}/clients/#{node_name}")
   rescue RestClient::ResourceNotFound
     return false
-  rescue RestClient::Exception => e
+  rescue => e
     puts "Sensu request failed: #{e}"
     return false
   else
@@ -110,11 +110,16 @@ end
 
 # call the Chef API to remove the node
 def remove_from_chef(node_name)
-  client = @chef.clients.fetch(node_name)
-  client.destroy
-  node = @chef.nodes.fetch(node_name)
-  node.destroy
-  notify_hipchat('Removed ' + node_name + ' from Chef') if @config[:hipchat][:enable]
+  begin
+    client = @chef.clients.fetch(node_name)
+    client.destroy
+    node = @chef.nodes.fetch(node_name)
+    node.destroy
+  rescue => e
+    puts "Failed to remove chef node: #{e}"
+  else
+    notify_hipchat('Removed ' + node_name + ' from Chef') if @config[:hipchat][:enable]
+  end
 end
 
 def notify_hipchat(msg)
