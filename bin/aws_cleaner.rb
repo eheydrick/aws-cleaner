@@ -158,7 +158,7 @@ loop do
           delete_message(id)
         end
       else
-        puts "Instance #{instance_id} does not 1exist in Chef, deleting message"
+        puts "Instance #{instance_id} does not exist in Chef, deleting message"
         delete_message(id)
       end
 
