@@ -13,8 +13,7 @@ SQS](http://docs.aws.amazon.com/config/latest/developerguide/monitor-resource-ch
 
 ### Installation
 
-1. Place the script in a directory. /opt/aws-cleaner, for example
-2. ``bundle install --deployment``
+1. `gem install aws-cleaner`
 
 ### Usage
 
@@ -23,9 +22,12 @@ and fill in the configuration details. You will need AWS Credentials
 and are strongly encouraged to use an IAM user with access limited to
 the AWS Config SQS queue.
 
-Currently the script does not daemonize but you can run it in a loop:
+The app takes one arg '-c' that points at the config file. If -c is
+omitted it will look for the config file in the current directory.
 
-  ``while true; do ./aws_cleaner.rb; sleep 5; done``
+The app is started by running aws_config.rb and it will run until
+terminated. A production install would start it with upstart or
+similar.
 
 ### Limitations
 
