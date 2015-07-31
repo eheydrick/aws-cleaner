@@ -73,7 +73,7 @@ end
 
 # call the Chef API to get the node name of the instance
 def get_chef_node_name(instance_id)
-  results = @chef.search.query(:node, "ec2_instance_id:#{instance_id}")
+  results = @chef.search.query(:node, "ec2_instance_id:#{instance_id} OR chef_provisioning_reference_server_id:#{instance_id}")
   if results.rows.size > 0
     return results.rows.first['name']
   else
