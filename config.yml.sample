@@ -14,3 +14,11 @@
   :api_token: 'Hipchat API token'
   :room: 'Notifications'
   :enable: true
+:webhooks:
+  example-webhook:
+    :url: 'http://localhost/nodes/{fqdn}'
+    :method: GET
+    :template_variables:
+      :variable: 'fqdn'
+      :method: 'get_chef_fqdn'
+      :argument: '@instance_id'

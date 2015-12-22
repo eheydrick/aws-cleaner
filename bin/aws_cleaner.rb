@@ -53,8 +53,8 @@ end
 # return the body of the SQS message in JSON
 def parse(body)
   JSON.parse(body)
-  rescue JSON::ParserError
-    return false
+rescue JSON::ParserError
+  return false
 end
 
 # return the instance_id of the terminated instance
@@ -76,6 +76,16 @@ def get_chef_node_name(instance_id)
   results = @chef.search.query(:node, "ec2_instance_id:#{instance_id} OR chef_provisioning_reference_server_id:#{instance_id}")
   if results.rows.size > 0
     return results.rows.first['name']
+  else
+    return false
+  end
+end
+
+# call the Chef API to get the FQDN of the instance
+def get_chef_fqdn(instance_id)
+  results = @chef.search.query(:node, "ec2_instance_id:#{instance_id} OR chef_provisioning_reference_server_id:#{instance_id}")
+  if results.rows.size > 0
+    return results.rows.first['automatic']['fqdn']
   else
     return false
   end
@@ -131,6 +141,37 @@ def notify_hipchat(msg)
   hipchat[room].send('AWS Cleaner', msg)
 end
 
+# generate the URL for the webhook
+def generate_webhook_url(url, template_variable_method, template_variable_argument, template_variable)
+  replacement = send(template_variable_method, eval(template_variable_argument))
+  url.gsub!(/{#{template_variable}/, replacement)
+  url
+end
+
+# call an HTTP endpoint
+def fire_webhook(config)
+  # generate templated URL
+  if config[:template_variables] && config[:url] =~ /\{\S+\}/
+    url = generate_webhook_url(
+      config[:url],
+      config[:template_variables][:method],
+      config[:template_variables][:argument],
+      config[:template_variables][:variable]
+    )
+  else
+    url = config[:url]
+  end
+
+  hook = { method: config[:method].to_sym, url: url }
+  begin
+    RestClient::Request.execute(hook)
+  rescue
+    return false
+  else
+    return true
+  end
+end
+
 # main loop
 loop do
   # get messages from SQS
@@ -176,6 +217,14 @@ loop do
           delete_message(id)
         end
       end
+
+      if @config[:webhooks]
+        @config[:webbooks].each do |_hook, config|
+          fire_webhook(config)
+        end
+        delete_message(id)
+      end
+
     else
       puts 'Message not relevant, deleting'
       delete_message(id)

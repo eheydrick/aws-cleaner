@@ -37,6 +37,26 @@ The app is started by running aws_config.rb and it will run until
 terminated. A production install would start it with upstart or
 similar.
 
+### Webhooks
+
+AWS Cleaner can optionally make an HTTP request to a specified endpoint. You can
+also template the URL that is called. Templating is currently limited to a single
+variable and the value can be either the Chef node name or the FQDN of the instance.
+
+To enable webhooks, add a `:webhooks:` section to the config:
+
+```
+:webhooks:
+  my-webhook:
+    :url: 'http://my.webhook.com/blah/{fqdn}'
+    :method: GET
+    :template_variables:
+      :variable: 'fqdn'
+      :method: 'get_chef_fqdn' (or 'get_chef_node_name')
+      :argument: '@instance_id'
+```
+
+
 ### Limitations
 
 Currently only supports a single AWS region.
