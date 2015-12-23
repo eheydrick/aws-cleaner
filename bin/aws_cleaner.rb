@@ -28,7 +28,7 @@ end
 
 # get options
 opts = Trollop::options do
-  opt :config, 'Path to config file', type: 'string', default: 'config.yml'
+  opt :config, 'Path to config file', type: :string, default: 'config.yml'
 end
 
 @config = config(opts[:config])
