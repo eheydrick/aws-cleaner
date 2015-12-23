@@ -1,12 +1,12 @@
 Gem::Specification.new do |s|
   s.name        = 'aws-cleaner'
   s.version     = '0.1.3'
-  s.summary     = "AWS Cleaner cleans up after EC2 instances are terminated"
+  s.summary     = 'AWS Cleaner cleans up after EC2 instances are terminated'
   s.description = s.summary
-  s.authors     = ["Eric Heydrick"]
+  s.authors     = ['Eric Heydrick']
   s.email       = 'eheydrick@gmail.com'
   s.executables = ['aws_cleaner.rb']
-  s.files       = ["bin/aws_cleaner.rb"]
+  s.files       = ['bin/aws_cleaner.rb']
   s.homepage    = 'https://github.com/eheydrick/aws-cleaner'
   s.license     = 'MIT'
 

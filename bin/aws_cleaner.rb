@@ -22,13 +22,13 @@ end
 
 def config(file)
   YAML.load(File.read(file))
-  rescue StandardError => e
-    raise "Failed to open config file: #{e}"
+rescue StandardError => e
+  raise "Failed to open config file: #{e}"
 end
 
 # get options
 opts = Trollop::options do
-  opt :config, 'Path to config file', :type => :string, :default => 'config.yml'
+  opt :config, 'Path to config file', type: 'string', default: 'config.yml'
 end
 
 @config = config(opts[:config])
@@ -46,7 +46,7 @@ def delete_message(id)
   delete = @sqs.delete_message(
     queue_url: @config[:sqs][:queue],
     receipt_handle: id
-   )
+  )
   delete ? true : false
 end
 
