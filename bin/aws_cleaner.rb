@@ -142,17 +142,17 @@ def notify_hipchat(msg)
 end
 
 # generate the URL for the webhook
-def generate_webhook_url(url, template_variable_method, template_variable_argument, template_variable)
+def generate_template(item, template_variable_method, template_variable_argument, template_variable)
   replacement = send(template_variable_method, eval(template_variable_argument))
-  url.gsub!(/{#{template_variable}/, replacement)
-  url
+  item.gsub!(/{#{template_variable}}/, replacement)
+  item
 end
 
 # call an HTTP endpoint
 def fire_webhook(config)
   # generate templated URL
   if config[:template_variables] && config[:url] =~ /\{\S+\}/
-    url = generate_webhook_url(
+    url = generate_template(
       config[:url],
       config[:template_variables][:method],
       config[:template_variables][:argument],
@@ -163,11 +163,20 @@ def fire_webhook(config)
   end
 
   hook = { method: config[:method].to_sym, url: url }
-  begin
-    RestClient::Request.execute(hook)
-  rescue
+  r = RestClient::Request.execute(hook)
+  if r.code != 200
     return false
   else
+    # notify hipchat when webhook is successful
+    if config[:hipchat][:enable]
+      msg = generate_template(
+        config[:hipchat][:message],
+        config[:hipchat][:method],
+        config[:hipchat][:argument],
+        config[:hipchat][:variable]
+      )
+      notify_hipchat(msg)
+    end
     return true
   end
 end
@@ -193,10 +202,21 @@ loop do
       next
     end
 
-    instance_id = process_message(body)
+    @instance_id = process_message(body)
 
-    if instance_id
-      chef_node = get_chef_node_name(instance_id)
+    if @instance_id
+      if @config[:webhooks]
+        @config[:webhooks].each do |hook, config|
+          if fire_webhook(config)
+            puts "Successfully ran webhook #{hook}"
+          else
+            puts "Failed to run webhook #{hook}"
+          end
+        end
+        delete_message(id)
+      end
+
+      chef_node = get_chef_node_name(@instance_id)
 
       if chef_node
         if remove_from_chef(chef_node)
@@ -204,7 +224,7 @@ loop do
           delete_message(id)
         end
       else
-        puts "Instance #{instance_id} does not exist in Chef, deleting message"
+        puts "Instance #{@instance_id} does not exist in Chef, deleting message"
         delete_message(id)
       end
 
@@ -213,16 +233,9 @@ loop do
           puts "Removed #{chef_node} from Sensu"
           delete_message(id)
         else
-          puts "Instance #{instance_id} does not exist in Sensu, deleting message"
+          puts "Instance #{@instance_id} does not exist in Sensu, deleting message"
           delete_message(id)
         end
-      end
-
-      if @config[:webhooks]
-        @config[:webbooks].each do |_hook, config|
-          fire_webhook(config)
-        end
-        delete_message(id)
       end
 
     else

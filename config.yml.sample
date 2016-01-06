@@ -22,3 +22,9 @@
       :variable: 'fqdn'
       :method: 'get_chef_fqdn'
       :argument: '@instance_id'
+    :hipchat:
+      :enable: true
+      :message: 'Did something to node {node}'
+      :variable: 'node'
+      :method: 'get_chef_node_name'
+      :argument: '@instance_id'
