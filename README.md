@@ -56,6 +56,8 @@ To enable webhooks, add a `:webhooks:` section to the config:
       :argument: '@instance_id'
 ```
 
+Hipchat notifications can be sent when the webhook successfully executes. See
+config.yml.sample for an example of the config.
 
 ### Limitations
 
