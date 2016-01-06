@@ -1,7 +1,7 @@
 # Changelog
 
 ### Unreleased
-- nothing
+- add hipchat notifications when webhooks fire
 
 ### 0.2.1
 - fix options
