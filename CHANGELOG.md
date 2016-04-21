@@ -2,6 +2,9 @@
 
 ### Unreleased
 
+### 0.3.1
+- add better error handling
+
 ### 0.3.0
 - add hipchat notifications when webhooks fire
 
