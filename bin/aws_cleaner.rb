@@ -4,7 +4,7 @@
 # and remove the node from Chef and Sensu and send a notification
 # to Hipchat
 #
-# Copyright (c) 2015 Eric Heydrick
+# Copyright (c) 2015, 2106 Eric Heydrick
 # Licensed under The MIT License
 #
 
@@ -94,7 +94,7 @@ end
 # check if the node exists in Sensu
 def in_sensu?(node_name)
   begin
-    RestClient.get("#{@config[:sensu][:url]}/clients/#{node_name}")
+    RestClient::Request.execute(url: "#{@config[:sensu][:url]}/clients/#{node_name}", method: :get, timeout: 5, open_timeout: 5)
   rescue RestClient::ResourceNotFound
     return false
   rescue => e
@@ -107,7 +107,7 @@ end
 
 # call the Sensu API to remove the node
 def remove_from_sensu(node_name)
-  response = RestClient.delete("#{@config[:sensu][:url]}/clients/#{node_name}")
+  response = RestClient::Request.execute(url: "#{@config[:sensu][:url]}/clients/#{node_name}", method: :delete, timeout: 5, open_timeout: 5)
   case response.code
   when 202
     notify_hipchat('Removed ' + node_name + ' from Sensu') if @config[:hipchat][:enable]
@@ -143,9 +143,15 @@ end
 
 # generate the URL for the webhook
 def generate_template(item, template_variable_method, template_variable_argument, template_variable)
-  replacement = send(template_variable_method, eval(template_variable_argument))
-  item.gsub!(/{#{template_variable}}/, replacement)
-  item
+  begin
+    replacement = send(template_variable_method, eval(template_variable_argument))
+    item.gsub!(/{#{template_variable}}/, replacement)
+  rescue Exception => e
+    puts "Error generating template: #{e.message}"
+    return false
+  else
+    item
+  end
 end
 
 # call an HTTP endpoint
@@ -158,6 +164,7 @@ def fire_webhook(config)
       config[:template_variables][:argument],
       config[:template_variables][:variable]
     )
+    return false unless url
   else
     url = config[:url]
   end
