@@ -3,7 +3,7 @@
   :secret_access_key: 'AWS Secret Access Key'
   :region: 'us-west-2'
 :sqs:
-  :queue: 'https://sqs.us-west-2.amazonaws.com/1234/aws-config'
+  :queue: 'https://sqs.us-west-2.amazonaws.com/1234/cloudwatch-events'
 :sensu:
   :url: 'http://sensu.example.com:4567'
 :chef:

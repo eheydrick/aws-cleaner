@@ -1,6 +1,8 @@
 # Changelog
 
 ### Unreleased
+- AWS Cleaner now uses [CloudWatch Events](http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/WhatIsCloudWatchEvents.html) instead of
+AWS Config to receive EC2 instance termination events. CloudWatch Events delivers events in seconds while AWS Config can take several minutes.
 
 ### 0.3.1
 - add better error handling

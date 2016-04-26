@@ -2,16 +2,21 @@
 
 [![Gem Version](https://badge.fury.io/rb/aws-cleaner.svg)](http://badge.fury.io/rb/aws-cleaner)
 
-AWS Cleaner listens for EC2 termination events produced by AWS Config
+AWS Cleaner listens for EC2 termination events produced by AWS [CloudWatch Events](http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/WhatIsCloudWatchEvents.html)
 and removes the instances from Chef and Sensu monitoring. Optionally
 sends messages to Hipchat when actions occur.
 
 ### Prerequisites
 
-You will need [AWS Config](http://aws.amazon.com/config/) enabled on
-your AWS account and AWS Config needs to be [configured to send
-messages to
-SQS](http://docs.aws.amazon.com/config/latest/developerguide/monitor-resource-changes.html).
+You will need to create a CloudWatch Events rule that's configured to send termination event messages to SQS.
+
+1. Create an SQS Queue for cloudwatch-events
+2. Goto CloudWatch Events in the AWS Console
+3. Click *Create rule*
+4. Select event source of *EC2 instance state change notification*
+5. Select specific state of *Terminated*
+6. Add a target of *SQS Queue* and set queue to the cloudwatch-events queue created in step one
+7. Give the rule a name/description and click *Create rule*
 
 ### Installation
 
@@ -28,7 +33,7 @@ Options:
 Copy the example config file ``config.yml.sample`` to ``config.yml``
 and fill in the configuration details. You will need AWS Credentials
 and are strongly encouraged to use an IAM user with access limited to
-the AWS Config SQS queue.
+the AWS CloudWatch Events SQS queue.
 
 The app takes one arg '-c' that points at the config file. If -c is
 omitted it will look for the config file in the current directory.

@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 #
-# Listen for AWS Config EC2 termination events delivered via SQS
+# Listen for AWS CloudWatch Events EC2 termination events delivered via SQS
 # and remove the node from Chef and Sensu and send a notification
 # to Hipchat
 #
-# Copyright (c) 2015, 2106 Eric Heydrick
+# Copyright (c) 2015, 2016 Eric Heydrick
 # Licensed under The MIT License
 #
 
@@ -59,16 +59,11 @@ end
 
 # return the instance_id of the terminated instance
 def process_message(message_body)
-  return false if message_body['configurationItem'].nil? &&
-                  message_body['configurationItemDiff'].nil?
+  return false if message_body['detail']['instance-id'].nil? &&
+                  message_body['detail']['state'] != 'terminated'
 
-  if message_body['configurationItem']['resourceType'] == 'AWS::EC2::Instance' &&
-     message_body['configurationItem']['configurationItemStatus'] == 'ResourceDeleted' &&
-     message_body['configurationItemDiff']['changeType'] == 'DELETE'
-    instance_id = message_body['configurationItem']['resourceId']
-  end
-
-  instance_id ? instance_id : false
+  instance_id = message_body['detail']['instance-id']
+  instance_id
 end
 
 # call the Chef API to get the node name of the instance
