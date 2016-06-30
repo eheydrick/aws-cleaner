@@ -4,7 +4,7 @@
 
 AWS Cleaner listens for EC2 termination events produced by AWS [CloudWatch Events](http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/WhatIsCloudWatchEvents.html)
 and removes the instances from Chef and Sensu monitoring. Optionally
-sends messages to Hipchat when actions occur.
+sends messages to Hipchat or Slack when actions occur.
 
 ### Prerequisites
 
@@ -61,7 +61,7 @@ To enable webhooks, add a `:webhooks:` section to the config:
       :argument: '@instance_id'
 ```
 
-Hipchat notifications can be sent when the webhook successfully executes. See
+Chat notifications can be sent when the webhook successfully executes. See
 config.yml.sample for an example of the config.
 
 ### Limitations

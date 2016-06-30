@@ -13,6 +13,12 @@
 :hipchat:
   :api_token: 'Hipchat API token'
   :room: 'Notifications'
+  :enable: false
+:slack:
+  :webhook_url: 'https://hooks.slack.com/services/XXXXXXXX/YYYYYYY/ZZZZZZZZZZZZZZZZ'
+  :channel: '#notifications'
+  :username: 'aws-cleaner'
+  :icon_emoji: ':ghost:'
   :enable: true
 :webhooks:
   example-webhook:
@@ -22,7 +28,7 @@
       :variable: 'fqdn'
       :method: 'get_chef_fqdn'
       :argument: '@instance_id'
-    :hipchat:
+    :chat:
       :enable: true
       :message: 'Did something to node {node}'
       :variable: 'node'

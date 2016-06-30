@@ -2,7 +2,7 @@
 #
 # Listen for AWS CloudWatch Events EC2 termination events delivered via SQS
 # and remove the node from Chef and Sensu and send a notification
-# to Hipchat
+# to Hipchat or Slack
 #
 # Copyright (c) 2015, 2016 Eric Heydrick
 # Licensed under The MIT License
@@ -16,6 +16,7 @@ begin
   require 'hipchat'
   require 'rest-client'
   require 'trollop'
+  require 'slack/poster'
 rescue LoadError => e
   raise "Missing gems: #{e}"
 end
@@ -105,10 +106,10 @@ def remove_from_sensu(node_name)
   response = RestClient::Request.execute(url: "#{@config[:sensu][:url]}/clients/#{node_name}", method: :delete, timeout: 5, open_timeout: 5)
   case response.code
   when 202
-    notify_hipchat('Removed ' + node_name + ' from Sensu') if @config[:hipchat][:enable]
+    notify_chat('Removed ' + node_name + ' from Sensu')
     return true
   else
-    notify_hipchat('Failed to remove ' + node_name + ' from Sensu') if @config[:hipchat][:enable]
+    notify_chat('Failed to remove ' + node_name + ' from Sensu')
     return false
   end
 end
@@ -123,10 +124,11 @@ def remove_from_chef(node_name)
   rescue => e
     puts "Failed to remove chef node: #{e}"
   else
-    notify_hipchat('Removed ' + node_name + ' from Chef') if @config[:hipchat][:enable]
+    notify_chat('Removed ' + node_name + ' from Chef')
   end
 end
 
+# notify hipchat
 def notify_hipchat(msg)
   hipchat = HipChat::Client.new(
     @config[:hipchat][:api_token],
@@ -134,6 +136,24 @@ def notify_hipchat(msg)
   )
   room = @config[:hipchat][:room]
   hipchat[room].send('AWS Cleaner', msg)
+end
+
+# notify slack
+def notify_slack(msg)
+  slack = Slack::Poster.new(@config[:slack][:webhook_url])
+  slack.channel = @config[:slack][:channel]
+  slack.username = @config[:slack][:username] ||= 'aws-cleaner'
+  slack.icon_emoji = @config[:slack][:icon_emoji] ||= nil
+  slack.send_message(msg)
+end
+
+# generic chat notification method
+def notify_chat(msg)
+  if @config[:hipchat][:enable]
+    notify_hipchat(msg)
+  elsif @config[:slack][:enable]
+    notify_slack(msg)
+  end
 end
 
 # generate the URL for the webhook
@@ -169,15 +189,15 @@ def fire_webhook(config)
   if r.code != 200
     return false
   else
-    # notify hipchat when webhook is successful
-    if config[:hipchat][:enable]
+    # notify chat when webhook is successful
+    if config[:chat][:enable]
       msg = generate_template(
-        config[:hipchat][:message],
-        config[:hipchat][:method],
-        config[:hipchat][:argument],
-        config[:hipchat][:variable]
+        config[:chat][:message],
+        config[:chat][:method],
+        config[:chat][:argument],
+        config[:chat][:variable]
       )
-      notify_hipchat(msg)
+      notify_chat(msg)
     end
     return true
   end

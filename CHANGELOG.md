@@ -1,6 +1,7 @@
 # Changelog
 
 ### Unreleased
+- add support for sending notifications to Slack
 
 ### 1.0.0
 - AWS Cleaner now uses [CloudWatch Events](http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/WhatIsCloudWatchEvents.html) instead of
