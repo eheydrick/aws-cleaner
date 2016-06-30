@@ -14,5 +14,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'chef-api', '~> 0.5'
   s.add_runtime_dependency 'hipchat', '~> 1.5'
   s.add_runtime_dependency 'rest-client', '~> 1.8'
+  s.add_runtime_dependency 'slack-poster', '~> 2.2'
   s.add_runtime_dependency 'trollop', '~> 2.1'
 end
