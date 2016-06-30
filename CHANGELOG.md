@@ -1,7 +1,7 @@
 # Changelog
 
 ### Unreleased
-- add support for sending notifications to Slack
+- add support for sending notifications to Slack. Note: the config settings for chat notifications has changed to add support for multiple chat providers.
 
 ### 1.0.0
 - AWS Cleaner now uses [CloudWatch Events](http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/WhatIsCloudWatchEvents.html) instead of
