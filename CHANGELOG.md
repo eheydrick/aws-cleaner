@@ -1,6 +1,8 @@
 # Changelog
 
 ### Unreleased
+
+### 2.0.0
 - add support for sending notifications to Slack. Note: the config settings for chat notifications has changed to add support for multiple chat providers.
 
 ### 1.0.0
