@@ -34,7 +34,8 @@ Options:
 Copy the example config file ``config.yml.sample`` to ``config.yml``
 and fill in the configuration details. You will need AWS Credentials
 and are strongly encouraged to use an IAM user with access limited to
-the AWS CloudWatch Events SQS queue.
+the AWS CloudWatch Events SQS queue.You will need to specify the region
+in the config even if you are using IAM Credentials.
 
 The app takes one arg '-c' that points at the config file. If -c is
 omitted it will look for the config file in the current directory.
@@ -68,4 +69,3 @@ config.yml.sample for an example of the config.
 ### Limitations
 
 Currently only supports a single AWS region.
-

@@ -1,4 +1,5 @@
 :aws:
+  # only region is required when using iam which is recommended
   :access_key_id: 'AWS Access Key'
   :secret_access_key: 'AWS Secret Access Key'
   :region: 'us-west-2'
