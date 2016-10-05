@@ -68,4 +68,5 @@ config.yml.sample for an example of the config.
 
 ### Limitations
 
-Currently only supports a single AWS region.
+- Currently only supports a single AWS region.
+- Only support chef and sensu with non self signed certificates. Look at Aws Certificate Manager or Let's Encrypt for free SSL certificates.
