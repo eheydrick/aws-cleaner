@@ -1,5 +1,7 @@
 ## AWS Cleaner
 
+![aws-cleaner](https://raw.github.com/eheydrick/aws-cleaner/master/aws-cleaner.png)
+
 [![Gem Version](https://badge.fury.io/rb/aws-cleaner.svg)](http://badge.fury.io/rb/aws-cleaner)
 [![Dependency Status](https://gemnasium.com/badges/github.com/eheydrick/aws-cleaner.svg)](https://gemnasium.com/github.com/eheydrick/aws-cleaner)
 
