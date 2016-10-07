@@ -14,12 +14,26 @@ sends messages to Hipchat or Slack when actions occur.
 You will need to create a CloudWatch Events rule that's configured to send termination event messages to SQS.
 
 1. Create an SQS Queue for cloudwatch-events
-2. Goto CloudWatch Events in the AWS Console
-3. Click *Create rule*
-4. Select event source of *EC2 instance state change notification*
-5. Select specific state of *Terminated*
-6. Add a target of *SQS Queue* and set queue to the cloudwatch-events queue created in step one
-7. Give the rule a name/description and click *Create rule*
+1. Goto CloudWatch Events in the AWS Console
+1. Click *Create rule*
+1. Select event source of *EC2 instance state change notification*
+1. Select specific state of *Terminated*
+1. Add a target of *SQS Queue* and set queue to the cloudwatch-events queue created in step one
+1. Give the rule a name/description and click *Create rule*
+
+You will also need to create a user with the required permissions. I recommend creating a 'aws-cleaner' user in chef and add it to its own group. The minimum permissions we found that works is read and delete nodes/clients.
+
+Steps:
+1. on chef server: `chef-server-ctl user-create aws-cleaner AWS Cleaner`
+1. on chef server: `address@domain.tld "$SOMEREALLYLONGRANDOMPASSWORD" -f aws-cleaner.pem`
+1. on chef server: `chef-server-ctl org-user-add $MYORG aws-cleaner`
+1. on workstation: `gem install knife-acl`
+1. on workstation: `knife group create aws-cleaner`
+1. on workstation: `knife group add user aws-cleaner aws-cleaner`
+1. on workstation: `knife acl bulk add group aws-cleaner clients '.*' read,delete -y`
+1. on workstation: `knife acl bulk add group aws-cleaner nodes '.*' read,delete -y`
+
+An astute reader might notice that this wont work for new nodes that come up as they have not had their ACL updated. I recommend that you add the who bulk acl knife commands (modified for just self as opposed to bulk) as part of your normal bootstrap process before deleting your validation key.
 
 ### Installation
 
