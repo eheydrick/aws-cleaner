@@ -1,6 +1,7 @@
 # Changelog
 
 ### Unreleased
+- refactor logic into a library
 
 ### 2.0.1
 - actually add `slack-poster` dependency

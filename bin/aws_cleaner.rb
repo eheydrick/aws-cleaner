@@ -8,6 +8,7 @@
 # Licensed under The MIT License
 #
 
+# ensure gems are present
 begin
   require 'json'
   require 'yaml'
@@ -21,6 +22,9 @@ rescue LoadError => e
   raise "Missing gems: #{e}"
 end
 
+# require our class
+require_relative '../lib/aws_cleaner/aws_cleaner.rb'
+
 def config(file)
   YAML.load(File.read(file))
 rescue StandardError => e
@@ -28,185 +32,21 @@ rescue StandardError => e
 end
 
 # get options
-opts = Trollop::options do
+opts = Trollop.options do
   opt :config, 'Path to config file', type: :string, default: 'config.yml'
 end
 
 @config = config(opts[:config])
 
-@sqs = Aws::SQS::Client.new(@config[:aws])
+# @sqs = Aws::SQS::Client.new(@config[:aws])
+@sqs_client = AwsCleaner::SQS.client(@config)
 
-@chef = ChefAPI::Connection.new(
-  endpoint: @config[:chef][:url],
-  client: @config[:chef][:client],
-  key: @config[:chef][:key]
-)
-
-# delete the message from SQS
-def delete_message(id)
-  delete = @sqs.delete_message(
-    queue_url: @config[:sqs][:queue],
-    receipt_handle: id
-  )
-  delete ? true : false
-end
-
-# return the body of the SQS message in JSON
-def parse(body)
-  JSON.parse(body)
-rescue JSON::ParserError
-  return false
-end
-
-# return the instance_id of the terminated instance
-def process_message(message_body)
-  return false if message_body['detail']['instance-id'].nil? &&
-                  message_body['detail']['state'] != 'terminated'
-
-  instance_id = message_body['detail']['instance-id']
-  instance_id
-end
-
-# call the Chef API to get the node name of the instance
-def get_chef_node_name(instance_id)
-  results = @chef.search.query(:node, "ec2_instance_id:#{instance_id} OR chef_provisioning_reference_server_id:#{instance_id}")
-  if results.rows.size > 0
-    return results.rows.first['name']
-  else
-    return false
-  end
-end
-
-# call the Chef API to get the FQDN of the instance
-def get_chef_fqdn(instance_id)
-  results = @chef.search.query(:node, "ec2_instance_id:#{instance_id} OR chef_provisioning_reference_server_id:#{instance_id}")
-  if results.rows.size > 0
-    return results.rows.first['automatic']['fqdn']
-  else
-    return false
-  end
-end
-
-# check if the node exists in Sensu
-def in_sensu?(node_name)
-  begin
-    RestClient::Request.execute(url: "#{@config[:sensu][:url]}/clients/#{node_name}", method: :get, timeout: 5, open_timeout: 5)
-  rescue RestClient::ResourceNotFound
-    return false
-  rescue => e
-    puts "Sensu request failed: #{e}"
-    return false
-  else
-    return true
-  end
-end
-
-# call the Sensu API to remove the node
-def remove_from_sensu(node_name)
-  response = RestClient::Request.execute(url: "#{@config[:sensu][:url]}/clients/#{node_name}", method: :delete, timeout: 5, open_timeout: 5)
-  case response.code
-  when 202
-    notify_chat('Removed ' + node_name + ' from Sensu')
-    return true
-  else
-    notify_chat('Failed to remove ' + node_name + ' from Sensu')
-    return false
-  end
-end
-
-# call the Chef API to remove the node
-def remove_from_chef(node_name)
-  begin
-    client = @chef.clients.fetch(node_name)
-    client.destroy
-    node = @chef.nodes.fetch(node_name)
-    node.destroy
-  rescue => e
-    puts "Failed to remove chef node: #{e}"
-  else
-    notify_chat('Removed ' + node_name + ' from Chef')
-  end
-end
-
-# notify hipchat
-def notify_hipchat(msg)
-  hipchat = HipChat::Client.new(
-    @config[:hipchat][:api_token],
-    api_version: 'v2'
-  )
-  room = @config[:hipchat][:room]
-  hipchat[room].send('AWS Cleaner', msg)
-end
-
-# notify slack
-def notify_slack(msg)
-  slack = Slack::Poster.new(@config[:slack][:webhook_url])
-  slack.channel = @config[:slack][:channel]
-  slack.username = @config[:slack][:username] ||= 'aws-cleaner'
-  slack.icon_emoji = @config[:slack][:icon_emoji] ||= nil
-  slack.send_message(msg)
-end
-
-# generic chat notification method
-def notify_chat(msg)
-  if @config[:hipchat][:enable]
-    notify_hipchat(msg)
-  elsif @config[:slack][:enable]
-    notify_slack(msg)
-  end
-end
-
-# generate the URL for the webhook
-def generate_template(item, template_variable_method, template_variable_argument, template_variable)
-  begin
-    replacement = send(template_variable_method, eval(template_variable_argument))
-    item.gsub!(/{#{template_variable}}/, replacement)
-  rescue Exception => e
-    puts "Error generating template: #{e.message}"
-    return false
-  else
-    item
-  end
-end
-
-# call an HTTP endpoint
-def fire_webhook(config)
-  # generate templated URL
-  if config[:template_variables] && config[:url] =~ /\{\S+\}/
-    url = generate_template(
-      config[:url],
-      config[:template_variables][:method],
-      config[:template_variables][:argument],
-      config[:template_variables][:variable]
-    )
-    return false unless url
-  else
-    url = config[:url]
-  end
-
-  hook = { method: config[:method].to_sym, url: url }
-  r = RestClient::Request.execute(hook)
-  if r.code != 200
-    return false
-  else
-    # notify chat when webhook is successful
-    if config[:chat][:enable]
-      msg = generate_template(
-        config[:chat][:message],
-        config[:chat][:method],
-        config[:chat][:argument],
-        config[:chat][:variable]
-      )
-      notify_chat(msg)
-    end
-    return true
-  end
-end
+@chef_client = AwsCleaner::Chef.client(@config)
 
 # main loop
 loop do
   # get messages from SQS
-  messages = @sqs.receive_message(
+  messages = @sqs_client.receive_message(
     queue_url: @config[:sqs][:queue],
     max_number_of_messages: 10,
     visibility_timeout: 3
@@ -216,53 +56,52 @@ loop do
 
   messages.each_with_index do |message, index|
     puts "Looking at message number #{index}"
-    body = parse(message.body)
+    body = AwsCleaner.new.parse(message.body)
     id = message.receipt_handle
 
     unless body
-      delete_message(id)
+      AwsCleaner.new.delete_message(id, @config)
       next
     end
 
-    @instance_id = process_message(body)
+    @instance_id = AwsCleaner.new.process_message(body)
 
     if @instance_id
       if @config[:webhooks]
-        @config[:webhooks].each do |hook, config|
-          if fire_webhook(config)
+        @config[:webhooks].each do |hook, hook_config|
+          if AwsCleaner.new.fire_webhook(hook_config, config)
             puts "Successfully ran webhook #{hook}"
           else
             puts "Failed to run webhook #{hook}"
           end
         end
-        delete_message(id)
+        AwsCleaner.new.delete_message(id, @config)
       end
 
-      chef_node = get_chef_node_name(@instance_id)
+      chef_node = AwsCleaner::Chef.get_chef_node_name(@instance_id, @chef_client)
 
       if chef_node
-        if remove_from_chef(chef_node)
+        if AwsCleaner::Chef.remove_from_chef(chef_node, @chef_client, @config)
           puts "Removed #{chef_node} from Chef"
-          delete_message(id)
+          AwsCleaner.new.delete_message(id, @config)
         end
       else
         puts "Instance #{@instance_id} does not exist in Chef, deleting message"
-        delete_message(id)
+        AwsCleaner.new.delete_message(id, @config)
       end
 
-      if in_sensu?(chef_node)
-        if remove_from_sensu(chef_node)
+      if AwsCleaner::Sensu.in_sensu?(chef_node, @config)
+        if AwsCleaner::Sensu.remove_from_sensu(chef_node, @config)
           puts "Removed #{chef_node} from Sensu"
-          delete_message(id)
         else
           puts "Instance #{@instance_id} does not exist in Sensu, deleting message"
-          delete_message(id)
         end
+        AwsCleaner.new.delete_message(id, @config)
       end
 
     else
       puts 'Message not relevant, deleting'
-      delete_message(id)
+      AwsCleaner.new.delete_message(id, @config)
     end
   end
 
