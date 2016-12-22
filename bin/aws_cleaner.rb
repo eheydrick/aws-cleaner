@@ -69,7 +69,7 @@ loop do
     if @instance_id
       if @config[:webhooks]
         @config[:webhooks].each do |hook, hook_config|
-          if AwsCleaner.new.fire_webhook(hook_config, config)
+          if AwsCleaner::Webhooks::fire_webhook(hook_config, config)
             puts "Successfully ran webhook #{hook}"
           else
             puts "Failed to run webhook #{hook}"

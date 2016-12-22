@@ -138,48 +138,50 @@ class AwsCleaner
     end
   end
 
-  # generate the URL for the webhook
-  def generate_template(item, template_variable_method, template_variable_argument, template_variable)
-    replacement = send(template_variable_method, eval(template_variable_argument))
-    item.gsub!(/{#{template_variable}}/, replacement)
-  rescue StandardError => e
-    puts "Error generating template: #{e.message}"
-    return false
-  else
-    item
-  end
-
-  # call an HTTP endpoint
-  def fire_webhook(hook_config, config)
-    # generate templated URL
-    if hook_config[:template_variables] && hook_config[:url] =~ /\{\S+\}/
-      url = AwsCleaner.new.generate_template(
-        hook_config[:url],
-        hook_config[:template_variables][:method],
-        hook_config[:template_variables][:argument],
-        hook_config[:template_variables][:variable]
-      )
-      return false unless url
-    else
-      url = hook_config[:url]
-    end
-
-    hook = { method: hook_config[:method].to_sym, url: url }
-    r = RestClient::Request.execute(hook)
-    if r.code != 200
+  module Webhooks
+    # generate the URL for the webhook
+    def self.generate_template(item, template_variable_method, template_variable_argument, template_variable)
+      replacement = send(template_variable_method, eval(template_variable_argument))
+      item.gsub!(/{#{template_variable}}/, replacement)
+    rescue StandardError => e
+      puts "Error generating template: #{e.message}"
       return false
     else
-      # notify chat when webhook is successful
-      if hook_config[:chat][:enable]
-        msg = AwsCleaner.new.generate_template(
-          hook_config[:chat][:message],
-          hook_config[:chat][:method],
-          hook_config[:chat][:argument],
-          hook_config[:chat][:variable]
+      item
+    end
+
+    # call an HTTP endpoint
+    def self.fire_webhook(hook_config, config)
+      # generate templated URL
+      if hook_config[:template_variables] && hook_config[:url] =~ /\{\S+\}/
+        url = AwsCleaner.new.generate_template(
+          hook_config[:url],
+          hook_config[:template_variables][:method],
+          hook_config[:template_variables][:argument],
+          hook_config[:template_variables][:variable]
         )
-        AwsCleaner::Notify.notify_chat(msg, config)
+        return false unless url
+      else
+        url = hook_config[:url]
       end
-      return true
+
+      hook = { method: hook_config[:method].to_sym, url: url }
+      r = RestClient::Request.execute(hook)
+      if r.code != 200
+        return false
+      else
+        # notify chat when webhook is successful
+        if hook_config[:chat][:enable]
+          msg = AwsCleaner.new.generate_template(
+            hook_config[:chat][:message],
+            hook_config[:chat][:method],
+            hook_config[:chat][:argument],
+            hook_config[:chat][:variable]
+          )
+          AwsCleaner::Notify.notify_chat(msg, config)
+        end
+        return true
+      end
     end
   end
 end
