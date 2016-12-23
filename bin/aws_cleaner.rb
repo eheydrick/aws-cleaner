@@ -69,7 +69,7 @@ loop do
     if @instance_id
       if @config[:webhooks]
         @config[:webhooks].each do |hook, hook_config|
-          if AwsCleaner::Webhooks::fire_webhook(hook_config, config)
+          if AwsCleaner::Webhooks::fire_webhook(hook_config, @config, @instance_id)
             puts "Successfully ran webhook #{hook}"
           else
             puts "Failed to run webhook #{hook}"
@@ -78,7 +78,7 @@ loop do
         AwsCleaner.new.delete_message(id, @config)
       end
 
-      chef_node = AwsCleaner::Chef.get_chef_node_name(@instance_id, @chef_client)
+      chef_node = AwsCleaner::Chef.get_chef_node_name(@instance_id, @config)
 
       if chef_node
         if AwsCleaner::Chef.remove_from_chef(chef_node, @chef_client, @config)

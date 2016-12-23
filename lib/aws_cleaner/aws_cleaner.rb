@@ -28,14 +28,16 @@ class AwsCleaner
     end
 
     # call the Chef API to get the node name of the instance
-    def self.get_chef_node_name(instance_id, chef)
+    def self.get_chef_node_name(instance_id, config)
+      chef = client(config)
       results = chef.search.query(:node, "ec2_instance_id:#{instance_id} OR chef_provisioning_reference_server_id:#{instance_id}")
       return false if results.rows.empty?
       results.rows.first['name']
     end
 
     # call the Chef API to get the FQDN of the instance
-    def self.get_chef_fqdn(instance_id, chef, _config)
+    def self.get_chef_fqdn(instance_id, config)
+      chef = client(config)
       results = chef.search.query(:node, "ec2_instance_id:#{instance_id} OR chef_provisioning_reference_server_id:#{instance_id}")
       return false if results.rows.empty?
       results.rows.first['automatic']['fqdn']
@@ -140,8 +142,14 @@ class AwsCleaner
 
   module Webhooks
     # generate the URL for the webhook
-    def self.generate_template(item, template_variable_method, template_variable_argument, template_variable)
-      replacement = send(template_variable_method, eval(template_variable_argument))
+    def self.generate_template(item, template_variable_method, template_variable_argument, template_variable, config, instance_id)
+      if template_variable_method == 'get_chef_fqdn'
+        replacement = AwsCleaner::Chef.get_chef_fqdn(instance_id, config)
+      elsif template_variable_method == 'get_chef_node_name'
+        replacement = AwsCleaner::Chef.get_chef_node_name(instance_id, config)
+      else
+        raise 'Unknown templating method'
+      end
       item.gsub!(/{#{template_variable}}/, replacement)
     rescue StandardError => e
       puts "Error generating template: #{e.message}"
@@ -151,14 +159,16 @@ class AwsCleaner
     end
 
     # call an HTTP endpoint
-    def self.fire_webhook(hook_config, config)
+    def self.fire_webhook(hook_config, config, instance_id)
       # generate templated URL
       if hook_config[:template_variables] && hook_config[:url] =~ /\{\S+\}/
-        url = AwsCleaner.new.generate_template(
+        url = AwsCleaner::Webhooks.generate_template(
           hook_config[:url],
           hook_config[:template_variables][:method],
           hook_config[:template_variables][:argument],
-          hook_config[:template_variables][:variable]
+          hook_config[:template_variables][:variable],
+          config,
+          instance_id
         )
         return false unless url
       else
@@ -172,11 +182,13 @@ class AwsCleaner
       else
         # notify chat when webhook is successful
         if hook_config[:chat][:enable]
-          msg = AwsCleaner.new.generate_template(
+          msg = AwsCleaner::Webhooks.generate_template(
             hook_config[:chat][:message],
             hook_config[:chat][:method],
             hook_config[:chat][:argument],
-            hook_config[:chat][:variable]
+            hook_config[:chat][:variable],
+            config,
+            instance_id
           )
           AwsCleaner::Notify.notify_chat(msg, config)
         end
