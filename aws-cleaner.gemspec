@@ -10,12 +10,15 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/eheydrick/aws-cleaner'
   s.license     = 'MIT'
 
-  s.add_development_dependency 'rubocop', '~> 0.43.0'
+  s.add_development_dependency 'bundler', '~> 1.12'
+  s.add_development_dependency 'rake', '~> 12.0'
+  s.add_development_dependency 'rspec', '~> 3.5'
+  s.add_development_dependency 'rubocop', '~> 0.46.0'
 
   s.add_runtime_dependency 'aws-sdk-core', '~> 2.0'
   s.add_runtime_dependency 'chef-api', '~> 0.5'
   s.add_runtime_dependency 'hipchat', '~> 1.5'
-  s.add_runtime_dependency 'rest-client', '~> 2 '
+  s.add_runtime_dependency 'rest-client', '~> 2'
   s.add_runtime_dependency 'slack-poster', '~> 2.2'
   s.add_runtime_dependency 'trollop', '~> 2.1'
 end
