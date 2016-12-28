@@ -1,4 +1,4 @@
-# Rubocop,  we're buddies and all,  but we're going to have to disagree on the following -
+# Rubocop, we're buddies and all, but we're going to have to disagree on the following -
 
 # Allow compact class definitions
 Style/ClassAndModuleChildren:
@@ -97,3 +97,11 @@ Style/SpaceBeforeFirstArg:
 AllCops:
   Include:
     - '**/*.rb'
+
+# allow longer blocks
+Metrics/BlockLength:
+  Max: 50
+
+# allow longer argument lists
+Metrics/ParameterLists:
+  Max: 6

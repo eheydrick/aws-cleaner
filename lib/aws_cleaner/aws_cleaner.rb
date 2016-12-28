@@ -142,7 +142,7 @@ class AwsCleaner
 
   module Webhooks
     # generate the URL for the webhook
-    def self.generate_template(item, template_variable_method, template_variable_argument, template_variable, config, instance_id)
+    def self.generate_template(item, template_variable_method, _template_variable_argument, template_variable, config, instance_id)
       if template_variable_method == 'get_chef_fqdn'
         replacement = AwsCleaner::Chef.get_chef_fqdn(instance_id, config)
       elsif template_variable_method == 'get_chef_node_name'
