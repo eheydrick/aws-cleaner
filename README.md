@@ -25,6 +25,7 @@ You will need to create a CloudWatch Events rule that's configured to send termi
 You will also need to create a user with the required permissions. I recommend creating a 'aws-cleaner' user in chef and add it to its own group. The minimum permissions we found that works is read and delete nodes/clients.
 
 Steps:
+
 1. on chef server: `chef-server-ctl user-create aws-cleaner AWS Cleaner`
 1. on chef server: `address@domain.tld "$SOMEREALLYLONGRANDOMPASSWORD" -f aws-cleaner.pem`
 1. on chef server: `chef-server-ctl org-user-add $MYORG aws-cleaner`
