@@ -1,5 +1,6 @@
 ## AWS Cleaner
 
+[![Build Status](https://travis-ci.org/eheydrick/aws-cleaner.svg?branch=master)](https://travis-ci.org/eheydrick/aws-cleaner)
 [![Gem Version](https://badge.fury.io/rb/aws-cleaner.svg)](http://badge.fury.io/rb/aws-cleaner)
 [![Dependency Status](https://gemnasium.com/badges/github.com/eheydrick/aws-cleaner.svg)](https://gemnasium.com/github.com/eheydrick/aws-cleaner)
 
