@@ -1,0 +1,13 @@
+language: ruby
+dist: trusty
+sudo: false
+cache: bundler
+
+before_install:
+  - gem install bundler
+
+rvm: 
+  - 2.3
+
+script:
+  - bundle exec rake
