@@ -4,6 +4,7 @@
 
 ### 2.1.0 - 2017-03-28
 - refactor logic into a library (Thanks [@majormoses](https://github.com/majormoses))
+- remove the `argument` parameter from the config. we now always use the instance ID when templating webhooks
 
 ### 2.0.1 - 2016-06-30
 - actually add `slack-poster` dependency
