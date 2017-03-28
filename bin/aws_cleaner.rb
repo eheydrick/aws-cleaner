@@ -4,7 +4,7 @@
 # and remove the node from Chef and Sensu and send a notification
 # to Hipchat or Slack
 #
-# Copyright (c) 2015, 2016 Eric Heydrick
+# Copyright (c) 2015-2017 Eric Heydrick
 # Licensed under The MIT License
 #
 
