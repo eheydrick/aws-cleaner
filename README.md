@@ -78,7 +78,6 @@ To enable webhooks, add a `:webhooks:` section to the config:
     :template_variables:
       :variable: 'fqdn'
       :method: 'get_chef_fqdn' (or 'get_chef_node_name')
-      :argument: '@instance_id'
 ```
 
 Chat notifications can be sent when the webhook successfully executes. See
