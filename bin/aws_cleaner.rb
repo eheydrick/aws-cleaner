@@ -23,7 +23,7 @@ rescue LoadError => e
 end
 
 # require our class
-require_relative '../lib/aws_cleaner/aws_cleaner.rb'
+require_relative '../lib/aws-cleaner.rb'
 
 def config(file)
   YAML.load(File.read(file))
