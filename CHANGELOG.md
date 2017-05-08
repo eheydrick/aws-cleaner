@@ -1,6 +1,7 @@
 # Changelog
 
 ### Unreleased
+- renaming gem files to be more easily consumed, previously had to `gem intall aws-cleaner` and then within any code use `require 'aws_cleaner/aws_cleaner.rb'` which just seems silly and should now just be able to `require aws-cleaner`.
 
 ### 2.1.0 - 2017-03-28
 - Refactor logic into a library (Thanks [@majormoses](https://github.com/majormoses))
