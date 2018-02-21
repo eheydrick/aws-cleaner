@@ -49,7 +49,7 @@ class AwsCleaner
       client.destroy
       node = chef.nodes.fetch(node_name)
       node.destroy
-    rescue => e
+    rescue StandardError => e
       puts "Failed to remove chef node: #{e}"
     else
       # puts "Removed #{node_name} from chef"
@@ -68,7 +68,7 @@ class AwsCleaner
       )
     rescue RestClient::ResourceNotFound
       return false
-    rescue => e
+    rescue StandardError => e
       puts "Sensu request failed: #{e}"
       return false
     else
