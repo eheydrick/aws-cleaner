@@ -2,6 +2,11 @@
 
 ### Unreleased
 
+### 2.2.0 - 2018-02-21
+- Improve logging. You can now log to a file in addition to stdout. [#10](https://github.com/eheydrick/aws-cleaner/issues/10) (Thanks [@huynt1979](https://github.com/huynt1979))
+- Update to latest Rubocop to address security issue
+- Test on latest rubies
+
 ### 2.1.1 - 2017-05-07
 - Rename lib file to be more easily consumed. Previously had to `gem install aws-cleaner` and then within any code use `require 'aws_cleaner/aws_cleaner.rb'`. Now you only need to `require aws-cleaner`. ([@majormoses](https://github.com/majormoses))
 
