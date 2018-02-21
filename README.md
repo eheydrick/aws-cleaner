@@ -62,6 +62,11 @@ The app is started by running aws_config.rb and it will run until
 terminated. A production install would start it with upstart or
 similar.
 
+### Logging
+
+By default aws-cleaner will log to STDOUT. If you wish to log to a specific file
+add a `log` section to the config. See [`config.yml.sample`](config.yml.sample) for an example.
+
 ### Webhooks
 
 AWS Cleaner can optionally make an HTTP request to a specified endpoint. You can
