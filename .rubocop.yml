@@ -71,7 +71,7 @@ Style/HashSyntax:
 Style/RescueModifier:
   Enabled: false
 
-Style/AccessorMethodName:
+Naming/AccessorMethodName:
   Enabled: false
 
 # allow larger modules
@@ -90,7 +90,7 @@ Lint/ParenthesesAsGroupedExpression:
 #   Enabled: false
 
 # allow multiple spaces between methofs and first arg
-Style/SpaceBeforeFirstArg:
+Layout/SpaceBeforeFirstArg:
   Enabled: false
 
 # There are too many non-ruby files that run up against rubocop rules in a cookbook
@@ -105,3 +105,7 @@ Metrics/BlockLength:
 # allow longer argument lists
 Metrics/ParameterLists:
   Max: 6
+
+# allow using $stderr
+Style/StderrPuts:
+  Enabled: false
