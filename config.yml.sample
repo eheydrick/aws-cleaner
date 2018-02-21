@@ -33,3 +33,5 @@
       :message: 'Did something to node {node}'
       :variable: 'node'
       :method: 'get_chef_node_name'
+:log:
+  :file: '/path/to/aws-cleaner-log-file.log'

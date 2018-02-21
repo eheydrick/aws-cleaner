@@ -18,6 +18,7 @@ begin
   require 'rest-client'
   require 'trollop'
   require 'slack/poster'
+  require 'logger'
 rescue LoadError => e
   raise "Missing gems: #{e}"
 end
@@ -26,9 +27,81 @@ end
 require_relative '../lib/aws-cleaner.rb'
 
 def config(file)
-  YAML.load(File.read(file))
+  YAML.safe_load(File.read(File.expand_path(file)), [Symbol])
 rescue StandardError => e
   raise "Failed to open config file: #{e}"
+end
+
+def logger(config)
+  file = config[:log][:file] unless config[:log].nil?
+
+  if file
+    begin
+      # Check if specified file can be written
+      awslog = File.open(File.expand_path(file), File::CREAT | File::WRONLY | File::APPEND)
+    rescue StandardError => e
+      $stderr.puts "aws-cleaner: ERROR - Failed to open log file #{file} beause of #{e}. STDOUT will be used instead."
+    end
+  else
+    $stdout.puts 'aws-cleaner: WARN - Log file is not specified. STDOUT will be used instead.'
+  end
+
+  # Use STDOUT if it is not possible to write to log file
+  awslog = STDOUT if awslog.nil?
+
+  # Make sure log is flushed out immediately instead of being buffered
+  awslog.sync = true
+
+  logger = Logger.new(awslog)
+
+  # Configure logger to escape all data
+  formatter = Logger::Formatter.new
+  logger.formatter = proc { |severity, datetime, progname, msg|
+    formatter.call(severity, datetime, progname, msg.dump)
+  }
+
+  logger
+end
+
+def webhook(id, instance_id)
+  if @config[:webhooks]
+    @config[:webhooks].each do |hook, hook_config|
+      if AwsCleaner::Webhooks.fire_webhook(hook_config, @config, instance_id)
+        @logger.info("Successfully ran webhook #{hook}")
+      else
+        @logger.info("Failed to run webhook #{hook}")
+      end
+    end
+    AwsCleaner.new.delete_message(id, @config)
+  end
+end
+
+def chef(id, instance_id, chef_node)
+  if chef_node
+    if AwsCleaner::Chef.remove_from_chef(chef_node, @chef_client, @config)
+      @logger.info("Removed #{chef_node} from Chef")
+      AwsCleaner.new.delete_message(id, @config)
+    end
+  else
+    @logger.info("Instance #{instance_id} does not exist in Chef, deleting message")
+    AwsCleaner.new.delete_message(id, @config)
+  end
+end
+
+def sensu(id, instance_id, chef_node)
+  if AwsCleaner::Sensu.in_sensu?(chef_node, @config)
+    if AwsCleaner::Sensu.remove_from_sensu(chef_node, @config)
+      @logger.info("Removed #{chef_node} from Sensu")
+    else
+      @logger.info("Instance #{instance_id} does not exist in Sensu, deleting message")
+    end
+    AwsCleaner.new.delete_message(id, @config)
+  end
+end
+
+def closelog(message)
+  @logger.debug(message) unless message.nil?
+  @logger.close
 end
 
 # get options
@@ -37,73 +110,50 @@ opts = Trollop.options do
 end
 
 @config = config(opts[:config])
-
-# @sqs = Aws::SQS::Client.new(@config[:aws])
+@logger = logger(@config)
 @sqs_client = AwsCleaner::SQS.client(@config)
-
 @chef_client = AwsCleaner::Chef.client(@config)
 
 # main loop
 loop do
-  # get messages from SQS
-  messages = @sqs_client.receive_message(
-    queue_url: @config[:sqs][:queue],
-    max_number_of_messages: 10,
-    visibility_timeout: 3
-  ).messages
+  begin
+    # get messages from SQS
+    messages = @sqs_client.receive_message(
+      queue_url: @config[:sqs][:queue],
+      max_number_of_messages: 10,
+      visibility_timeout: 3
+    ).messages
 
-  puts "Got #{messages.size} messages"
+    @logger.info("Got #{messages.size} messages") unless messages.empty?
 
-  messages.each_with_index do |message, index|
-    puts "Looking at message number #{index}"
-    body = AwsCleaner.new.parse(message.body)
-    id = message.receipt_handle
+    messages.each_with_index do |message, index|
+      @logger.info("Looking at message number #{index}")
+      body = AwsCleaner.new.parse(message.body)
+      id = message.receipt_handle
 
-    unless body
-      AwsCleaner.new.delete_message(id, @config)
-      next
-    end
-
-    @instance_id = AwsCleaner.new.process_message(body)
-
-    if @instance_id
-      if @config[:webhooks]
-        @config[:webhooks].each do |hook, hook_config|
-          if AwsCleaner::Webhooks.fire_webhook(hook_config, @config, @instance_id)
-            puts "Successfully ran webhook #{hook}"
-          else
-            puts "Failed to run webhook #{hook}"
-          end
-        end
+      unless body
         AwsCleaner.new.delete_message(id, @config)
+        next
       end
 
-      chef_node = AwsCleaner::Chef.get_chef_node_name(@instance_id, @config)
+      instance_id = AwsCleaner.new.process_message(body)
 
-      if chef_node
-        if AwsCleaner::Chef.remove_from_chef(chef_node, @chef_client, @config)
-          puts "Removed #{chef_node} from Chef"
-          AwsCleaner.new.delete_message(id, @config)
-        end
+      if instance_id
+        chef_node = AwsCleaner::Chef.get_chef_node_name(instance_id, @config)
+        webhook(id, instance_id)
+        chef(id, instance_id, chef_node)
+        sensu(id, instance_id, chef_node)
       else
-        puts "Instance #{@instance_id} does not exist in Chef, deleting message"
+        @logger.info('Message not relevant, deleting')
         AwsCleaner.new.delete_message(id, @config)
       end
-
-      if AwsCleaner::Sensu.in_sensu?(chef_node, @config)
-        if AwsCleaner::Sensu.remove_from_sensu(chef_node, @config)
-          puts "Removed #{chef_node} from Sensu"
-        else
-          puts "Instance #{@instance_id} does not exist in Sensu, deleting message"
-        end
-        AwsCleaner.new.delete_message(id, @config)
-      end
-
-    else
-      puts 'Message not relevant, deleting'
-      AwsCleaner.new.delete_message(id, @config)
     end
-  end
 
-  sleep(5)
+    sleep(5)
+  rescue Interrupt
+    closelog('Received Interrupt signal. Quit aws-cleaner')
+    exit
+  rescue StandardError => e
+    @logger.error("Encountered #{e}: #{e.message}")
+  end
 end
