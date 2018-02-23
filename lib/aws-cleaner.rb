@@ -177,7 +177,7 @@ class AwsCleaner
       hook = { method: hook_config[:method].to_sym, url: url }
       begin
         RestClient::Request.execute(hook)
-      rescue RestClient::ExceptionWithResponse => e
+      rescue RestClient::ExceptionWithResponse
         return false
       end
       # notify chat when webhook is successful
