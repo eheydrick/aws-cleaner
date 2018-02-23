@@ -2,6 +2,10 @@
 
 ### Unreleased
 
+### 2.2.1 - 2018-02-22
+- Fix webhook templating
+- Handle webhook exceptions better
+
 ### 2.2.0 - 2018-02-21
 - Improve logging. You can now log to a file in addition to stdout. [#10](https://github.com/eheydrick/aws-cleaner/issues/10) (Thanks [@huynt1979](https://github.com/huynt1979))
 - Update to latest Rubocop to address security issue
