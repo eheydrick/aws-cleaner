@@ -150,12 +150,12 @@ class AwsCleaner
       else
         raise 'Unknown templating method'
       end
-      item.gsub!(/{#{template_variable}}/, replacement)
+      replaced_item = item.gsub(/{#{template_variable}}/, replacement)
     rescue StandardError => e
       puts "Error generating template: #{e.message}"
       return false
     else
-      item
+      replaced_item
     end
 
     # call an HTTP endpoint
@@ -175,21 +175,21 @@ class AwsCleaner
       end
 
       hook = { method: hook_config[:method].to_sym, url: url }
-      r = RestClient::Request.execute(hook)
-      if r.code != 200
+      begin
+        RestClient::Request.execute(hook)
+      rescue RestClient::ExceptionWithResponse => e
         return false
-      else
-        # notify chat when webhook is successful
-        if hook_config[:chat][:enable]
-          msg = AwsCleaner::Webhooks.generate_template(
-            hook_config[:chat][:message],
-            hook_config[:chat][:method],
-            hook_config[:chat][:variable],
-            config,
-            instance_id
-          )
-          AwsCleaner::Notify.notify_chat(msg, config)
-        end
+      end
+      # notify chat when webhook is successful
+      if hook_config[:chat][:enable]
+        msg = AwsCleaner::Webhooks.generate_template(
+          hook_config[:chat][:message],
+          hook_config[:chat][:method],
+          hook_config[:chat][:variable],
+          config,
+          instance_id
+        )
+        AwsCleaner::Notify.notify_chat(msg, config)
         return true
       end
     end
