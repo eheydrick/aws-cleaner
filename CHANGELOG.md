@@ -2,6 +2,9 @@
 
 ### Unreleased
 
+### 2.3.0 - 2018-03-28
+- Make sensu removal optional. Defaults to enabled but can be disabled by setting `:enable: false` in the config. (Thanks [@majormoses](https://github.com/majormoses))
+
 ### 2.2.1 - 2018-02-22
 - Fix webhook templating
 - Handle webhook exceptions better
