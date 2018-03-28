@@ -7,6 +7,7 @@
   :queue: 'https://sqs.us-west-2.amazonaws.com/1234/cloudwatch-events'
 :sensu:
   :url: 'http://sensu.example.com:4567'
+  :enable: true
 :chef:
   :url: 'https://chef.example.com/organizations/example'
   :client: 'somebody'

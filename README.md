@@ -5,8 +5,7 @@
 [![Dependency Status](https://gemnasium.com/badges/github.com/eheydrick/aws-cleaner.svg)](https://gemnasium.com/github.com/eheydrick/aws-cleaner)
 
 AWS Cleaner listens for EC2 termination events produced by AWS [CloudWatch Events](http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/WhatIsCloudWatchEvents.html)
-and removes the instances from Chef and Sensu monitoring. Optionally
-sends messages to Hipchat or Slack when actions occur.
+and removes the instances from Chef. It can optionally remove the node from Sensu Monitoring (defaults true), fire off webhooks, and send notifications via Hipchat & Slack when actions occur.
 
 ![aws-cleaner](https://raw.github.com/eheydrick/aws-cleaner/master/aws-cleaner.png)
 
@@ -87,6 +86,23 @@ To enable webhooks, add a `:webhooks:` section to the config:
 
 Chat notifications can be sent when the webhook successfully executes. See
 config.yml.sample for an example of the config.
+
+### Sensu
+
+By default aws-cleaner assumes that removing from sensu is desired as this was one of its core intentions. To allow people to leverage this without sensu you can disable it via config:
+```
+:sensu:
+  :enable: false
+```
+
+When wanting to use sensu you will want the following config:
+```
+:sensu:
+  :url: 'http://sensu.example.com:4567'
+  :enable: true
+```
+
+While we currently assume sensu removal being desired is considered the default it may not always be so you should set `enable` to true to avoid a breaking change later.
 
 ### Limitations
 

@@ -89,6 +89,7 @@ def chef(id, instance_id, chef_node)
 end
 
 def sensu(id, instance_id, chef_node)
+  return unless @config[:sensu][:enable]
   if AwsCleaner::Sensu.in_sensu?(chef_node, @config)
     if AwsCleaner::Sensu.remove_from_sensu(chef_node, @config)
       @logger.info("Removed #{chef_node} from Sensu")
@@ -113,6 +114,13 @@ end
 @logger = logger(@config)
 @sqs_client = AwsCleaner::SQS.client(@config)
 @chef_client = AwsCleaner::Chef.client(@config)
+
+# to provide backwards compatibility as this key did not exist previously
+@config[:sensu][:enable] = if @config[:sensu][:enable].nil?
+                             true
+                           else
+                             @config[:sensu][:enable]
+                           end
 
 # main loop
 loop do
