@@ -109,3 +109,7 @@ Metrics/ParameterLists:
 # allow using $stderr
 Style/StderrPuts:
   Enabled: false
+
+# disable naming check
+Naming/FileName:
+  Enabled: false

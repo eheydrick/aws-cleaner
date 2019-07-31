@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # main aws_cleaner lib
 class AwsCleaner
   # SQS related stuff
@@ -32,6 +34,7 @@ class AwsCleaner
       chef = client(config)
       results = chef.search.query(:node, "ec2_instance_id:#{instance_id} OR chef_provisioning_reference_server_id:#{instance_id}")
       return false if results.rows.empty?
+
       results.rows.first['name']
     end
 
@@ -40,6 +43,7 @@ class AwsCleaner
       chef = client(config)
       results = chef.search.query(:node, "ec2_instance_id:#{instance_id} OR chef_provisioning_reference_server_id:#{instance_id}")
       return false if results.rows.empty?
+
       results.rows.first['automatic']['fqdn']
     end
 

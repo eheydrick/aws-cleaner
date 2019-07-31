@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 #
 # Listen for AWS CloudWatch Events EC2 termination events delivered via SQS
 # and remove the node from Chef and Sensu and send a notification
@@ -90,6 +92,7 @@ end
 
 def sensu(id, instance_id, chef_node)
   return unless @config[:sensu][:enable]
+
   if AwsCleaner::Sensu.in_sensu?(chef_node, @config)
     if AwsCleaner::Sensu.remove_from_sensu(chef_node, @config)
       @logger.info("Removed #{chef_node} from Sensu")
