@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'aws-sdk-sqs', '~> 1'
   s.add_runtime_dependency 'chef-api', '~> 0.5'
   s.add_runtime_dependency 'hipchat', '~> 1.5'
+  s.add_runtime_dependency 'optimist', '~> 3.0'
   s.add_runtime_dependency 'rest-client', '~> 2'
   s.add_runtime_dependency 'slack-poster', '~> 2.2'
-  s.add_runtime_dependency 'trollop', '~> 2.1'
 end

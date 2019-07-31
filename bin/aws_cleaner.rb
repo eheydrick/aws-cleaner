@@ -16,7 +16,7 @@ begin
   require 'chef-api'
   require 'hipchat'
   require 'rest-client'
-  require 'trollop'
+  require 'optimist'
   require 'slack/poster'
   require 'logger'
 rescue LoadError => e
@@ -106,7 +106,7 @@ def closelog(message)
 end
 
 # get options
-opts = Trollop.options do
+opts = Optimist.options do
   opt :config, 'Path to config file', type: :string, default: 'config.yml'
 end
 
