@@ -12,7 +12,7 @@
 begin
   require 'json'
   require 'yaml'
-  require 'aws-sdk-core'
+  require 'aws-sdk-sqs'
   require 'chef-api'
   require 'hipchat'
   require 'rest-client'
