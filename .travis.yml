@@ -1,5 +1,5 @@
 language: ruby
-dist: trusty
+dist: xenial
 sudo: false
 cache: bundler
 
@@ -7,9 +7,9 @@ before_install:
   - gem install bundler
 
 rvm: 
-  - 2.3.6
-  - 2.4.3
-  - 2.5.0
+  - 2.4.6
+  - 2.5.5
+  - 2.6.3
 
 script:
   - bundle exec rake
