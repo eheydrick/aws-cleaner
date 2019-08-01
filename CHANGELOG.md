@@ -2,6 +2,12 @@
 
 ### Unreleased
 
+### 2.4.0 - 2019-07-31
+- Use aws-sdk v3. (Thanks [@genehand](https://github.com/genehand))
+- Replace trollop with optimist
+- Test on latest ruby versions, drop 2.3
+- Update to Rubocop 0.73
+
 ### 2.3.0 - 2018-03-28
 - Make sensu removal optional. Defaults to enabled but can be disabled by setting `:enable: false` in the config. (Thanks [@majormoses](https://github.com/majormoses))
 
