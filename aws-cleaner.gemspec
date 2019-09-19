@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rubocop', '~> 0.73.0'
 
   s.add_runtime_dependency 'aws-sdk-sqs', '~> 1'
-  s.add_runtime_dependency 'chef-api', '~> 0.5'
+  s.add_runtime_dependency 'chef-infra-api', '~> 0.9'
   s.add_runtime_dependency 'hipchat', '~> 1.5'
   s.add_runtime_dependency 'optimist', '~> 3.0'
   s.add_runtime_dependency 'rest-client', '~> 2'
