@@ -2,6 +2,9 @@
 
 ### Unreleased
 
+### 2.4.1 - 2019-09-19
+- Replace chef-api with chef-infra-api
+
 ### 2.4.0 - 2019-07-31
 - Use aws-sdk v3. (Thanks [@genehand](https://github.com/genehand))
 - Replace trollop with optimist
