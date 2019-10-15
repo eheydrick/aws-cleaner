@@ -4,7 +4,7 @@
 [![Gem Version](https://badge.fury.io/rb/aws-cleaner.svg)](http://badge.fury.io/rb/aws-cleaner)
 
 AWS Cleaner listens for EC2 termination events produced by AWS [CloudWatch Events](http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/WhatIsCloudWatchEvents.html)
-and removes the instances from Chef. It can optionally remove the node from Sensu Monitoring (defaults true), fire off webhooks, and send notifications via Hipchat & Slack when actions occur.
+and removes the instances from Chef. It can optionally remove the node from Sensu Monitoring (defaults true), fire off webhooks, and send notifications via Slack when actions occur.
 
 ![aws-cleaner](https://raw.github.com/eheydrick/aws-cleaner/master/aws-cleaner.png)
 

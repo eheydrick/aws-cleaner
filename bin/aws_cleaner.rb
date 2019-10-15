@@ -4,9 +4,9 @@
 #
 # Listen for AWS CloudWatch Events EC2 termination events delivered via SQS
 # and remove the node from Chef and Sensu and send a notification
-# to Hipchat or Slack
+# to Slack
 #
-# Copyright (c) 2015-2017 Eric Heydrick
+# Copyright (c) 2015-2019 Eric Heydrick
 # Licensed under The MIT License
 #
 
@@ -16,7 +16,6 @@ begin
   require 'yaml'
   require 'aws-sdk-sqs'
   require 'chef-api'
-  require 'hipchat'
   require 'rest-client'
   require 'optimist'
   require 'slack/poster'
