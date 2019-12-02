@@ -2,6 +2,9 @@
 
 ### Unreleased
 
+### 2.4.2 - 2019-12-01
+- Remove unused hipchat support
+
 ### 2.4.1 - 2019-09-19
 - Replace chef-api with chef-infra-api
 
