@@ -115,16 +115,6 @@ class AwsCleaner
   end
 
   module Notify
-    # notify hipchat
-    def self.notify_hipchat(msg, config)
-      hipchat = HipChat::Client.new(
-        config[:hipchat][:api_token],
-        api_version: 'v2'
-      )
-      room = config[:hipchat][:room]
-      hipchat[room].send('AWS Cleaner', msg)
-    end
-
     # notify slack
     def self.notify_slack(msg, config)
       slack = Slack::Poster.new(config[:slack][:webhook_url])
@@ -136,9 +126,7 @@ class AwsCleaner
 
     # generic chat notification method
     def self.notify_chat(msg, config)
-      if config[:hipchat][:enable]
-        notify_hipchat(msg, config)
-      elsif config[:slack][:enable]
+      if config[:slack][:enable]
         notify_slack(msg, config)
       end
     end

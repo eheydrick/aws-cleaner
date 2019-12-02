@@ -12,10 +12,6 @@
   :url: 'https://chef.example.com/organizations/example'
   :client: 'somebody'
   :key: '/path/to/client.pem'
-:hipchat:
-  :api_token: 'Hipchat API token'
-  :room: 'Notifications'
-  :enable: false
 :slack:
   :webhook_url: 'https://hooks.slack.com/services/XXXXXXXX/YYYYYYY/ZZZZZZZZZZZZZZZZ'
   :channel: '#notifications'
